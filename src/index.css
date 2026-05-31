@@ -60,11 +60,16 @@
   opacity: 1;
   transform: none;
 }
+.hero {
+  color: hsl(var(--primary));
 
+}
 .scene-heading {
   font-family: 'Courier Prime', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 0.5em;
   text-transform: uppercase;
   color: hsl(var(--primary));
 }

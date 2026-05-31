@@ -90,7 +90,7 @@
 <!-- Navigation -->
 <nav class={`fixed top-0 w-full z-[100] transition-all duration-300 ${scrolled ? 'bg-background/97 border-b border-white/15 py-4' : 'bg-black/30 backdrop-blur-sm py-5'}`}>
   <div class="max-w-6xl mx-auto px-6 flex justify-between items-center text-xs uppercase tracking-[0.22em]">
-    <button on:click={() => { window.scrollTo({top:0,behavior:'smooth'}); mobileMenuOpen = false; }} class="font-bold hover:text-primary transition-colors">I.B.</button>
+    <button on:click={() => { window.scrollTo({top:0,behavior:'smooth'}); mobileMenuOpen = false; }} class="hero text-2xl font-bold hover:text-primary transition-colors">I.B.</button>
 
     <!-- Desktop links -->
     <div class="hidden md:flex gap-8">
@@ -130,7 +130,10 @@
     <div class="absolute inset-0 bg-black/65"></div>
   </div>
   <div class="relative z-20 text-center px-6 max-w-4xl mx-auto animate-[fadeIn_2s_ease-out]">
-    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-[0.3em] mb-8">Inayat Bakshi</h1>
+    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold uppercase tracking-[0.3em] mb-8">
+      <span class="hero">I</span>nayat
+      <span class="hero">B</span>akshi
+    </h1>
     <p class="text-sm md:text-base italic text-foreground/75 mb-12 max-w-xl mx-auto leading-relaxed">
       {content.heroTagline}
     </p>
