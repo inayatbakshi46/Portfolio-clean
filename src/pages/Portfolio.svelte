@@ -178,7 +178,7 @@ async function loadAll() {
 <!-- About -->
 <section id="about" class="py-24 md:py-32 px-6 max-w-6xl mx-auto">
   <div class="reveal">
-    <div class="scene-heading mb-12">INT. ABOUT ME — DAY</div>
+    <div class="scene-heading text-xs md:text-2xl mb-12">INT. ABOUT ME — DAY</div>
     <div class="grid md:grid-cols-2 gap-16 items-center">
       <div class="relative aspect-[3/4] w-full max-w-sm mx-auto border border-white/20 p-2">
         <div class="w-full h-full border border-white/20 flex items-center justify-center bg-card/20">
@@ -202,7 +202,7 @@ async function loadAll() {
 <!-- Screenplays -->
 <section id="screenplays" class="py-24 md:py-32 px-6 max-w-6xl mx-auto border-t border-white/10">
   <div class="reveal">
-    <div class="scene-heading mb-12">EXT. SCREENPLAYS — NIGHT</div>
+    <div class="scene-heading text-xs md:text-2xl mb-12">EXT. SCREENPLAYS — NIGHT</div>
     <div class="grid md:grid-cols-3 gap-8">
       {#each screenplays as s (s.id)}
         {@const posterSrc = s.posterUrl || (s.builtInPoster ? POSTER_MAP[s.builtInPoster] : null)}
@@ -236,7 +236,7 @@ async function loadAll() {
 <!-- Portfolio Grid -->
 <section class="py-24 md:py-32 px-6 max-w-6xl mx-auto border-t border-white/10">
   <div class="reveal">
-    <div class="scene-heading mb-12">INT. PORTFOLIO — DAY</div>
+    <div class="scene-heading text-xs md:text-2xl mb-12">INT. PORTFOLIO — DAY</div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       {#each [
         { label: 'Screenplays', count: content.countScreenplays, desc: 'Feature-length scripts' },
@@ -257,7 +257,7 @@ async function loadAll() {
 <!-- Process -->
 <section id="process" class="py-24 md:py-32 px-6 max-w-6xl mx-auto border-t border-white/10">
   <div class="reveal">
-    <div class="scene-heading mb-16">EXT. PROCESS — CONTINUOUS</div>
+    <div class="scene-heading text-xs md:text-2xl mb-16">EXT. PROCESS — CONTINUOUS</div>
     <div class="relative">
       <div class="hidden md:block absolute top-[15px] left-0 w-full h-[1px] bg-white/15"></div>
       <div class="flex flex-col md:flex-row justify-between gap-10 md:gap-4 relative z-10">
@@ -280,7 +280,7 @@ async function loadAll() {
 <!-- Testimonials / Voices -->
 <section class="py-24 md:py-32 px-6 max-w-4xl mx-auto border-t border-white/10">
   <div class="reveal">
-    <div class="scene-heading mb-16 text-center">INT. VOICES — NIGHT</div>
+    <div class="scene-heading text-xs md:text-2xl mb-16 text-center">INT. VOICES — NIGHT</div>
     <div class="space-y-14">
       {#each testimonials as t (t.id)}
         <div class="border-t border-white/10 pt-10" data-testid={`testimonial-${t.id}`}>
@@ -298,12 +298,12 @@ async function loadAll() {
 </section>
 
 <!-- Contact -->
-<section id="contact" class="py-24 md:py-32 px-6 max-w-6xl mx-auto border-t border-white/10">
+<section id="contact" class="py-24 md:p-32 px-6 max-w-6xl mx-auto border-t border-white/10">
   <div class="reveal">
-    <div class="scene-heading mb-12">INT. CONTACT — NIGHT</div>
+    <div class="scene-heading text-xs md:text-2xl mb-12">INT. CONTACT — NIGHT</div>
     <div class="grid md:grid-cols-2 gap-16">
       <div>
-        <h3 class="text-3xl font-bold uppercase tracking-widest mb-6">Let's Connect</h3>
+        <h3 class="text-xl font-bold uppercase tracking-widest mb-6">Let's Connect</h3>
         <p class="text-sm text-foreground/70 mb-8 max-w-md leading-relaxed">
           Available for writing assignments, script doctoring, and creative collaborations.
         </p>
@@ -311,10 +311,20 @@ async function loadAll() {
           <a href="mailto:{content.contactEmail}" class="text-primary hover:text-white transition-colors tracking-widest uppercase text-sm" data-testid="link-email">{content.contactEmail}</a>
         </div>
         <div class="flex gap-6 text-xs uppercase tracking-widest">
-          <a href={content.linkedinUrl} aria-label="LinkedIn" class="hover:text-primary transition-colors" data-testid="link-linkedin">LinkedIn</a>
-          <a href={content.instagramUrl} aria-label="Instagram" class="hover:text-primary transition-colors" data-testid="link-instagram">Instagram</a>
-          <a href={content.discordUrl} aria-label="Discord" class="hover:text-primary transition-colors" data-testid="link-discord">Discord</a>
-          <a href={content.letterboxdUrl} aria-label="Letterboxd" class="hover:text-primary transition-colors" data-testid="link-letterboxd">Letterboxd</a>
+          <a href={content.linkedinUrl} aria-label="LinkedIn" class="hover:text-primary transition-colors" data-testid="link-linkedin"><svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+  <path fill-rule="evenodd" d="M12.51 8.796v1.697a3.738 3.738 0 0 1 3.288-1.684c3.455 0 4.202 2.16 4.202 4.97V19.5h-3.2v-5.072c0-1.21-.244-2.766-2.128-2.766-1.827 0-2.139 1.317-2.139 2.676V19.5h-3.19V8.796h3.168ZM7.2 6.106a1.61 1.61 0 0 1-.988 1.483 1.595 1.595 0 0 1-1.743-.348A1.607 1.607 0 0 1 5.6 4.5a1.601 1.601 0 0 1 1.6 1.606Z" clip-rule="evenodd"/>
+  <path d="M7.2 8.809H4V19.5h3.2V8.809Z"/>
+</svg>
+</a>
+          <a href={content.instagramUrl} aria-label="Instagram" class="hover:text-primary transition-colors" data-testid="link-instagram"><svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path fill="currentColor" fill-rule="evenodd" d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Zm5-3a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H8Zm7.597 2.214a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2h-.01a1 1 0 0 1-1-1ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-5 3a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z" clip-rule="evenodd"/>
+</svg>
+</a>
+          <a href={content.discordUrl} aria-label="Discord" class="hover:text-primary transition-colors" data-testid="link-discord"><svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+  <path d="M18.942 5.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.586 11.586 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3 17.392 17.392 0 0 0-2.868 11.662 15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.638 10.638 0 0 1-1.706-.83c.143-.106.283-.217.418-.331a11.664 11.664 0 0 0 10.118 0c.137.114.277.225.418.331-.544.328-1.116.606-1.71.832a12.58 12.58 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM8.678 14.813a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.929 1.929 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z"/>
+</svg>
+</a>
+          <a href={content.letterboxdUrl} aria-label="Letterboxd" class="hover:text-primary transition-colors" data-testid="link-letterboxd"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-letterboxd"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M6 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M14 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg></a>
         </div>
       </div>
       <div>
