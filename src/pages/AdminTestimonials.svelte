@@ -1,4 +1,5 @@
 <script lang="ts">
+import { supabase } from '../lib/supabase';
   import { onMount } from 'svelte';
   import { storage, type Testimonial, type Screenplay, type SiteContent, DEFAULT_CONTENT } from '../lib/storage';
 
@@ -25,18 +26,25 @@
 
   let toast = '';
 
-  onMount(() => {
-    if (sessionStorage.getItem('ib_admin_auth') === 'true') {
-      isAuthenticated = true;
-      loadAll();
-    }
-  });
+  
 
-  function loadAll() {
-    testimonials = storage.testimonials.load();
-    screenplays = storage.screenplays.load();
-    content = storage.content.load();
-  }
+  async function loadAll() {
+  const [testimonialsRes, screenplaysRes, contentRes] = await Promise.all([
+    supabase.from('testimonials').select('*'),
+    supabase.from('screenplays').select('*'),
+    supabase.from('site_content').select('*').single()
+  ]);
+
+  // console.log("SCREENPLAYS RAW:", screenplaysRes);
+
+  // if (testimonialsRes.error) console.log(testimonialsRes.error);
+  // if (screenplaysRes.error) console.log(screenplaysRes.error);
+  // if (contentRes.error) console.log(contentRes.error);
+
+  testimonials = testimonialsRes.data ?? [];
+  screenplays = screenplaysRes.data ?? [];
+  content = contentRes.data ?? DEFAULT_CONTENT;
+}
 
   function showToast(msg: string) {
     toast = msg;
@@ -44,18 +52,26 @@
   }
 
   // Auth
-  function handleLogin(e: Event) {
-    e.preventDefault();
-    if (passphrase === 'inayat-writes') {
-      sessionStorage.setItem('ib_admin_auth', 'true');
-      isAuthenticated = true;
-      authError = false;
-      loadAll();
-    } else {
-      authError = true;
-      setTimeout(() => authError = false, 900);
-    }
-  }
+  async function handleLogin(e: Event) {
+  e.preventDefault();
+
+  const { data, error } = await supabase
+  .from('admin_config')
+  .select('passphrase');
+
+if (error) {
+  console.log(error);
+  return;
+}
+const stored = data?.[0]?.passphrase;
+if (passphrase === stored) {
+  
+  isAuthenticated = true;
+  loadAll();
+} else {
+  authError = true;
+}
+}
 
   function handleLogout() {
     sessionStorage.removeItem('ib_admin_auth');
@@ -64,77 +80,174 @@
   }
 
   // Testimonials
-  function addTestimonial(e: Event) {
-    e.preventDefault();
-    const t: Testimonial = {
-      id: Date.now().toString(),
+  async function addTestimonial(e: Event) {
+  e.preventDefault();
+
+  const { data, error } = await supabase
+    .from('testimonials')
+    .insert([{
       name: newTestimonial.name.toUpperCase(),
       role: newTestimonial.role,
-      quote: newTestimonial.quote,
-    };
-    testimonials = [...testimonials, t];
-    storage.testimonials.save(testimonials);
-    newTestimonial = { name: '', role: '', quote: '' };
-    showToast('Voice added. Live on site.');
+      quote: newTestimonial.quote
+    }])
+    .select();
+
+  if (error) {
+    console.log(error);
+    return;
   }
 
-  function deleteTestimonial(id: string) {
-    testimonials = testimonials.filter(t => t.id !== id);
-    storage.testimonials.save(testimonials);
-    showToast('Voice removed.');
+  testimonials = [...testimonials, data[0]];
+  newTestimonial = { name: '', role: '', quote: '' };
+}
+
+  async function deleteTestimonial(id: string) {
+  const { error } = await supabase
+    .from('testimonials')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.log(error);
+    return;
   }
+
+  testimonials = testimonials.filter(t => t.id !== id);
+}
 
   // Screenplays
-  function addScreenplay(e: Event) {
-    e.preventDefault();
-    const s: Screenplay = {
-      id: Date.now().toString(),
-      title: newScreenplay.title,
-      genre: newScreenplay.genre,
-      logline: newScreenplay.logline,
-      status: newScreenplay.status,
-      ctaText: newScreenplay.ctaText,
-      builtInPoster: newScreenplay.builtInPoster as Screenplay['builtInPoster'],
-      posterUrl: newScreenplay.posterUrl,
-      screenplayUrl: newScreenplay.screenplayUrl,
-    };
-    screenplays = [...screenplays, s];
-    storage.screenplays.save(screenplays);
-    newScreenplay = { title: '', genre: '', logline: '', status: 'Development', ctaText: 'Read Script', builtInPoster: '' };
-    showToast('Screenplay added. Live on site.');
+  async function addScreenplay(e: Event) {
+  e.preventDefault();
+
+  const { data, error } = await supabase
+    .from('screenplays')
+    .insert([
+      {
+        title: newScreenplay.title,
+        genre: newScreenplay.genre,
+        logline: newScreenplay.logline,
+        status: newScreenplay.status,
+        ctatext: newScreenplay.ctaText,
+        builtinposter: newScreenplay.builtInPoster,
+        posterurl: newScreenplay.posterUrl,
+        screenplayurl: newScreenplay.screenplayUrl
+      }
+    ])
+    .select(); // important
+
+  if (error) {
+    console.log(error);
+    return;
   }
+
+  // update UI instantly
+  screenplays = [...screenplays, data[0]];
+
+  // reset form
+  newScreenplay = {
+    title: '',
+    genre: '',
+    logline: '',
+    status: 'Development',
+    ctaText: 'Read Script',
+    builtInPoster: '',
+    posterUrl: '',
+    screenplayUrl: ''
+  };
+
+  showToast('Screenplay added to database');
+}
 
   function startEditScreenplay(s: Screenplay) {
     editingScreenplayId = s.id;
     editingScreenplay = { ...s };
   }
 
-  function saveEditScreenplay() {
-    if (!editingScreenplay) return;
-    screenplays = screenplays.map(s => s.id === editingScreenplayId ? { ...editingScreenplay! } : s);
-    storage.screenplays.save(screenplays);
-    editingScreenplayId = null;
-    editingScreenplay = null;
-    showToast('Screenplay updated.');
+  async function saveEditScreenplay() {
+  if (!editingScreenplay || !editingScreenplayId) return;
+
+  const { error } = await supabase
+    .from('screenplays')
+    .update({
+      title: editingScreenplay.title,
+      genre: editingScreenplay.genre,
+      logline: editingScreenplay.logline,
+      status: editingScreenplay.status,
+      ctatext: editingScreenplay.ctaText,
+      builtinposter: editingScreenplay.builtinPoster,
+      posterurl: editingScreenplay.posterUrl,
+      screenplayurl: editingScreenplay.screenplayUrl
+    })
+    .eq('id', editingScreenplayId);
+
+  if (error) {
+    console.log(error);
+    return;
   }
+
+  // update UI
+  screenplays = screenplays.map(s =>
+    s.id === editingScreenplayId ? editingScreenplay : s
+  );
+
+  editingScreenplayId = null;
+  editingScreenplay = null;
+
+  showToast('Screenplay updated');
+}
 
   function cancelEdit() {
     editingScreenplayId = null;
     editingScreenplay = null;
   }
 
-  function deleteScreenplay(id: string) {
-    screenplays = screenplays.filter(s => s.id !== id);
-    storage.screenplays.save(screenplays);
-    showToast('Screenplay removed.');
+  async function deleteScreenplay(id: string) {
+  const { error } = await supabase
+    .from('screenplays')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.log(error);
+    return;
   }
 
+  // update UI
+  screenplays = screenplays.filter(s => s.id !== id);
+
+  showToast('Screenplay deleted');
+}
+
   // Content
-  function saveContent(e: Event) {
-    e.preventDefault();
-    storage.content.save(content);
-    showToast('Content saved. Live on site.');
+async function saveContent(e: Event) {
+  e.preventDefault();
+
+  const { error } = await supabase
+    .from('site_content')
+    .update({
+      herotagline: content.heroTagline,
+      aboutbio: content.aboutBio,
+      aboutquote: content.aboutQuote,
+      countscreenplays: content.countScreenplays,
+      countshortfilms: content.countShortFilms,
+      countconcepts: content.countConcepts,
+      countsamples: content.countSamples,
+      contactemail: content.contactEmail,
+      linkedinurl: content.linkedinUrl,
+      instagramurl: content.instagramUrl,
+      discordurl: content.discordUrl,
+      letterboxdurl: content.letterboxdUrl,
+      footerquote: content.footerQuote
+    })
+    .eq('id', 'ccc9e4cf-beb9-4ac8-bdbe-a16fe9aefb60');
+
+  if (error) {
+    console.log(error);
+    return;
   }
+
+  showToast('Content saved to Supabase');
+}
 
   const STATUS_OPTIONS: Screenplay['status'][] = ['Completed', 'In Progress', 'Development'];
   const POSTER_OPTIONS = [

@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { storage, DEFAULT_CONTENT } from '../lib/storage';
-  import type { Testimonial, Screenplay, SiteContent } from '../lib/storage';
+  import { supabase } from '../lib/supabase';
+import { onMount } from 'svelte';
+import type { Testimonial, Screenplay, SiteContent } from '../lib/storage';
+import { DEFAULT_CONTENT } from '../lib/storage';
 
   import heroBg from "../assets/hero-bg.png";
   import posterLoop from "../assets/poster-loop.png";
@@ -37,37 +38,66 @@
   let screenplays: Screenplay[] = [];
   let content: SiteContent = { ...DEFAULT_CONTENT };
   let formStatus = '';
+async function loadAll() {
+  const [t, s, c] = await Promise.all([
+    supabase.from('testimonials').select('*'),
+    supabase.from('screenplays').select('*'),
+    supabase.from('site_content').select('*').limit(1).single()
+  ]);
 
-  onMount(() => {
-    // Nav scroll
-    const onScroll = () => { scrolled = window.scrollY > 50; };
-    window.addEventListener('scroll', onScroll);
+  if (t.error) console.log('testimonials:', t.error);
+  if (s.error) console.log('screenplays:', s.error);
+  if (c.error) console.log('content:', c.error);
 
-    // Scroll reveals
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  testimonials = t.data ?? [];
+  screenplays = (s.data ?? []).map(sp => ({
+  ...sp,
+  ctaText: sp.ctatext,
+  builtInPoster: sp.builtinposter,
+  posterUrl: sp.posterurl,
+  screenplayUrl: sp.screenplayurl
+}));
+  
+  if (c.data) {
+  content = {
+    heroTagline: c.data.herotagline ?? '',
+    aboutBio: c.data.aboutbio ?? '',
+    aboutQuote: c.data.aboutquote ?? '',
+    countScreenplays: c.data.countscreenplays ?? 0,
+    countShortFilms: c.data.countshortfilms ?? 0,
+    countConcepts: c.data.countconcepts ?? 0,
+    countSamples: c.data.countsamples ?? 0,
+    contactEmail: c.data.contactemail ?? '',
+    linkedinUrl: c.data.linkedinurl ?? '',
+    instagramUrl: c.data.instagramurl ?? '',
+    discordUrl: c.data.discordurl ?? '',
+    letterboxdUrl: c.data.letterboxdurl ?? '',
+    footerQuote: c.data.footerquote ?? ''
+  };
+}
+}
+ onMount(() => {
+  const onScroll = () => {
+    scrolled = window.scrollY > 50;
+  };
 
-    // Load data
-    testimonials = storage.testimonials.load();
-    screenplays = storage.screenplays.load();
-    content = storage.content.load();
+  window.addEventListener('scroll', onScroll);
 
-    // Re-load if another tab (admin) saved data
-    const onStorage = () => {
-      testimonials = storage.testimonials.load();
-      screenplays = storage.screenplays.load();
-      content = storage.content.load();
-    };
-    window.addEventListener('storage', onStorage);
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.08 });
 
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('storage', onStorage);
-      observer.disconnect();
-    };
-  });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  loadAll(); // 🔥 THIS is the only data source now
+
+  return () => {
+    window.removeEventListener('scroll', onScroll);
+    observer.disconnect();
+  };
+});
 
   function scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -85,7 +115,7 @@
   function pad(n: number) { return String(n).padStart(2, '0'); }
 </script>
 
-<div class="film-grain"></div>
+<div class="film-grain min-h-screen"></div>
 
 <!-- Navigation -->
 <nav class={`fixed top-0 w-full z-[100] transition-all duration-300 ${scrolled ? 'bg-background/97 border-b border-white/15 py-4' : 'bg-black/30 backdrop-blur-sm py-5'}`}>
